@@ -1,0 +1,116 @@
+// Revio — Prisma schema
+// Local dev uses SQLite so the app runs without any cloud setup.
+// For production on Vercel, switch datasource provider to "postgresql"
+// and point DATABASE_URL at a Postgres (e.g. Neon) connection string.
+// Enum-like fields are stored as strings and validated in the app layer
+// (see src/lib/constants.ts) because SQLite has no native enum type.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String   @id @default(cuid())
+  name         String
+  email        String   @unique
+  passwordHash String
+  role         String // "STUDENT" | "ADVISER"
+  adviserCode  String?  @unique // set only for ADVISER accounts
+  createdAt    DateTime @default(now())
+
+  ownedProjects    Project[] @relation("StudentProjects")
+  advisedProjects  Project[] @relation("AdviserProjects")
+  feedbacks        Feedback[]
+  timelineEvents   TimelineEvent[]
+}
+
+model Project {
+  id          String   @id @default(cuid())
+  title       String
+  description String
+  githubUrl   String?
+  liveUrl     String?
+  createdAt   DateTime @default(now())
+
+  studentId String
+  student   User   @relation("StudentProjects", fields: [studentId], references: [id], onDelete: Cascade)
+
+  adviserId String
+  adviser   User   @relation("AdviserProjects", fields: [adviserId], references: [id], onDelete: Cascade)
+
+  documents       Document[]
+  progressUpdates ProgressUpdate[]
+  feedbacks       Feedback[]
+  timelineEvents  TimelineEvent[]
+
+  @@index([studentId])
+  @@index([adviserId])
+}
+
+model Document {
+  id         String   @id @default(cuid())
+  type       String // "PROPOSAL" | "CHAPTER_1".."CHAPTER_5" | "OTHER"
+  fileName   String
+  fileUrl    String
+  version    Int      @default(1)
+  status     String   @default("PENDING_REVIEW") // PENDING_REVIEW | APPROVED | REVISION_REQUIRED
+  uploadedAt DateTime @default(now())
+
+  projectId String
+  project   Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@index([projectId])
+}
+
+model ProgressUpdate {
+  id                String   @id @default(cuid())
+  completedFeatures String
+  milestones        String
+  challenges        String
+  upcomingTasks     String
+  createdAt         DateTime @default(now())
+
+  projectId String
+  project   Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@index([projectId])
+}
+
+model Feedback {
+  id            String   @id @default(cuid())
+  targetType    String // "DOCUMENT" | "PROGRESS"
+  targetId      String
+  body          String
+  statusApplied String? // same set as Document.status, when applied
+  createdAt     DateTime @default(now())
+
+  projectId String
+  project   Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  authorId String
+  author   User   @relation(fields: [authorId], references: [id], onDelete: Cascade)
+
+  @@index([projectId])
+  @@index([targetId])
+}
+
+model TimelineEvent {
+  id        String   @id @default(cuid())
+  type      String // DOCUMENT_UPLOADED | PROGRESS_POSTED | FEEDBACK_GIVEN | STATUS_CHANGED
+  refId     String?
+  summary   String
+  createdAt DateTime @default(now())
+
+  projectId String
+  project   Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  actorId String
+  actor   User   @relation(fields: [actorId], references: [id], onDelete: Cascade)
+
+  @@index([projectId])
+}

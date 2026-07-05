@@ -1,36 +1,72 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Revio
 
-## Getting Started
+**Capstone project review & monitoring platform.** Students post their capstone
+outputs (documents, code links, progress); advisers review and give feedback on
+their own time. No in-person meeting required, no administrator role.
 
-First, run the development server:
+Built with Next.js (App Router) + Prisma. Two roles: **Student** and **Adviser**.
+Advisers generate a unique code; students join by entering it.
+
+## Getting started
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npm install
+npx prisma migrate dev   # creates the local SQLite database
+npm run dev              # http://localhost:3000
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+The app runs fully locally out of the box — SQLite for data, and uploaded files
+saved to `public/uploads`.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### Environment (`.env`)
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+| Variable | Purpose |
+| --- | --- |
+| `DATABASE_URL` | Database connection. Default: `file:./dev.db` (SQLite). |
+| `AUTH_SECRET` | Secret used to sign session cookies. **Change this in production.** |
+| `BLOB_READ_WRITE_TOKEN` | Optional. When set, uploads go to Vercel Blob instead of the local folder. |
 
-## Learn More
+## How it works
 
-To learn more about Next.js, take a look at the following resources:
+1. **Adviser** registers → gets a code like `ADV-7QK2ML` shown on their dashboard.
+2. **Student** registers → creates a project (title, description, GitHub URL, live
+   URL) and links the adviser with that code.
+3. Student uploads documents (proposal, Chapter 1–5, other) and posts progress
+   updates. New uploads of the same type become new versions; old versions are kept.
+4. Adviser opens the project, reviews documents, opens the GitHub/live links, and
+   leaves feedback — a comment plus a status: **Approved / Pending Review /
+   Revision Required**.
+5. Every action is recorded on the project's **timeline**, giving both sides a
+   transparent chronological history.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Access control: only a project's owning student or its linked adviser can open it;
+anything else returns 404.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Project structure
 
-## Deploy on Vercel
+```
+prisma/schema.prisma          Data model (User, Project, Document, ProgressUpdate,
+                              Feedback, TimelineEvent)
+src/lib/                      prisma client, auth (session/bcrypt/jose), storage,
+                              access control, timeline + adviser-code helpers,
+                              domain constants
+src/app/actions/              Server actions (auth, project, document, progress, feedback)
+src/app/                      Pages: /, /login, /register, /dashboard,
+                              /project/new, /project/[id]
+src/components/               UI + client forms
+```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Deploying to Vercel
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+1. Switch the Prisma datasource provider in `prisma/schema.prisma` from `sqlite`
+   to `postgresql` and set `DATABASE_URL` to a Postgres connection string (e.g.
+   Neon via the Vercel Marketplace). Re-run `npx prisma migrate dev`.
+2. Add a Vercel Blob store and set `BLOB_READ_WRITE_TOKEN` so uploads persist.
+3. Set a strong `AUTH_SECRET` in the project's environment variables.
+4. Deploy.
+
+## Out of scope (future versions)
+
+Real-time chat, notifications, GitHub API integration, AI-assisted review,
+plagiarism detection, and panel evaluations are intentionally excluded from this
+MVP.
