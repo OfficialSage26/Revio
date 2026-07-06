@@ -5,7 +5,7 @@ import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { requireRole } from "@/lib/auth";
 import { getAccessibleProject } from "@/lib/access";
-import { saveUpload } from "@/lib/storage";
+import { saveUpload, StorageError } from "@/lib/storage";
 import { logEvent } from "@/lib/timeline";
 import { DOCUMENT_TYPES, DOCUMENT_TYPE_LABELS, type DocumentType } from "@/lib/constants";
 
@@ -53,7 +53,13 @@ export async function uploadDocumentAction(
   });
   const version = (latest?.version ?? 0) + 1;
 
-  const fileUrl = await saveUpload(file);
+  let fileUrl: string;
+  try {
+    fileUrl = await saveUpload(file);
+  } catch (err) {
+    if (err instanceof StorageError) return { error: err.message };
+    throw err;
+  }
 
   const doc = await prisma.document.create({
     data: {

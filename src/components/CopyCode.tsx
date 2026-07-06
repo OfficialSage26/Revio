@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { Check, Copy } from "lucide-react";
 
 export function CopyCode({ code }: { code: string }) {
   const [copied, setCopied] = useState(false);
@@ -18,12 +19,22 @@ export function CopyCode({ code }: { code: string }) {
   return (
     <button
       onClick={copy}
-      className="inline-flex items-center gap-2 rounded-lg border border-indigo-200 bg-white px-3 py-1.5 font-mono text-sm font-semibold tracking-wider text-indigo-700 transition hover:bg-indigo-50"
+      className="group inline-flex items-center gap-3 rounded-xl border border-indigo-200 bg-white px-4 py-2.5 shadow-sm transition hover:border-indigo-300 hover:shadow"
       title="Copy code"
     >
-      {code}
-      <span className="text-xs font-sans font-normal text-slate-400">
-        {copied ? "Copied!" : "Copy"}
+      <span className="font-mono text-base font-bold tracking-[0.2em] text-indigo-700">
+        {code}
+      </span>
+      <span className="inline-flex items-center gap-1 text-xs font-medium text-slate-400 group-hover:text-indigo-500">
+        {copied ? (
+          <>
+            <Check className="h-3.5 w-3.5" /> Copied
+          </>
+        ) : (
+          <>
+            <Copy className="h-3.5 w-3.5" /> Copy
+          </>
+        )}
       </span>
     </button>
   );

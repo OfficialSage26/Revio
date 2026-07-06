@@ -64,7 +64,7 @@ export async function createProjectAction(
   await logEvent({
     projectId: project.id,
     actorId: student.id,
-    type: "STATUS_CHANGED",
+    type: "PROJECT_CREATED",
     summary: `${student.name} created the project and linked adviser ${adviser.name}.`,
   });
 

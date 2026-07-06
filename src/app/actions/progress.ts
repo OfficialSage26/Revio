@@ -26,9 +26,9 @@ export async function postProgressAction(
   const parsed = schema.safeParse({
     projectId: formData.get("projectId"),
     completedFeatures: formData.get("completedFeatures"),
-    milestones: formData.get("milestones"),
-    challenges: formData.get("challenges"),
-    upcomingTasks: formData.get("upcomingTasks"),
+    milestones: formData.get("milestones") ?? "",
+    challenges: formData.get("challenges") ?? "",
+    upcomingTasks: formData.get("upcomingTasks") ?? "",
   });
   if (!parsed.success) {
     return { error: parsed.error.issues[0]?.message ?? "Invalid input." };

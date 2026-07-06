@@ -2,11 +2,9 @@
 
 import { useActionState } from "react";
 import Link from "next/link";
+import { AlertCircle } from "lucide-react";
 import { loginAction, type FormState } from "@/app/actions/auth";
 import { SubmitButton } from "@/components/SubmitButton";
-
-const inputClass =
-  "w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100";
 
 export function LoginForm() {
   const [state, formAction] = useActionState<FormState, FormData>(
@@ -15,32 +13,46 @@ export function LoginForm() {
   );
 
   return (
-    <form action={formAction} className="space-y-4">
+    <form action={formAction} className="space-y-5">
       <div>
-        <label className="mb-1.5 block text-sm font-medium text-slate-700">
-          Email
-        </label>
-        <input name="email" type="email" required className={inputClass} />
+        <label className="field-label">Email</label>
+        <input
+          name="email"
+          type="email"
+          required
+          autoComplete="email"
+          placeholder="you@school.edu"
+          className="input"
+        />
       </div>
 
       <div>
-        <label className="mb-1.5 block text-sm font-medium text-slate-700">
-          Password
-        </label>
-        <input name="password" type="password" required className={inputClass} />
+        <label className="field-label">Password</label>
+        <input
+          name="password"
+          type="password"
+          required
+          autoComplete="current-password"
+          placeholder="Your password"
+          className="input"
+        />
       </div>
 
       {state?.error && (
-        <p className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">
+        <p className="flex items-center gap-2 rounded-xl bg-rose-50 px-3.5 py-2.5 text-sm text-rose-700">
+          <AlertCircle className="h-4 w-4 shrink-0" />
           {state.error}
         </p>
       )}
 
       <SubmitButton className="w-full">Sign in</SubmitButton>
 
-      <p className="text-center text-sm text-slate-600">
+      <p className="text-center text-sm text-slate-500">
         No account yet?{" "}
-        <Link href="/register" className="font-medium text-indigo-600 hover:underline">
+        <Link
+          href="/register"
+          className="font-semibold text-indigo-600 hover:underline"
+        >
           Create one
         </Link>
       </p>

@@ -45,9 +45,36 @@ export const STATUS_STYLES: Record<DocumentStatus, string> = {
 };
 
 export const TIMELINE_TYPES = [
+  "PROJECT_CREATED",
   "DOCUMENT_UPLOADED",
   "PROGRESS_POSTED",
   "FEEDBACK_GIVEN",
   "STATUS_CHANGED",
 ] as const;
 export type TimelineType = (typeof TIMELINE_TYPES)[number];
+
+// Upload whitelist. Extensions not listed here are rejected — this blocks
+// html/svg/js uploads that would execute scripts when served from our origin.
+export const ALLOWED_UPLOAD_EXTENSIONS: Record<string, string> = {
+  pdf: "application/pdf",
+  doc: "application/msword",
+  docx: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+  ppt: "application/vnd.ms-powerpoint",
+  pptx: "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+  xls: "application/vnd.ms-excel",
+  xlsx: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+  txt: "text/plain",
+  md: "text/plain",
+  csv: "text/csv",
+  png: "image/png",
+  jpg: "image/jpeg",
+  jpeg: "image/jpeg",
+  gif: "image/gif",
+  webp: "image/webp",
+  zip: "application/zip",
+};
+
+export function uploadExtension(fileName: string): string | null {
+  const ext = fileName.split(".").pop()?.toLowerCase() ?? "";
+  return ext in ALLOWED_UPLOAD_EXTENSIONS ? ext : null;
+}

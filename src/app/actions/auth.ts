@@ -11,6 +11,7 @@ import {
 } from "@/lib/auth";
 import { generateAdviserCode } from "@/lib/timeline";
 import { ROLES } from "@/lib/constants";
+import { checkRateLimit, clearRateLimit } from "@/lib/rate-limit";
 
 export type FormState = { error?: string } | undefined;
 
@@ -75,11 +76,19 @@ export async function loginAction(
   }
 
   const { email, password } = parsed.data;
+
+  if (!checkRateLimit(`login:${email}`)) {
+    return {
+      error: "Too many failed attempts. Please wait 15 minutes and try again.",
+    };
+  }
+
   const user = await prisma.user.findUnique({ where: { email } });
   if (!user || !(await verifyPassword(password, user.passwordHash))) {
     return { error: "Incorrect email or password." };
   }
 
+  clearRateLimit(`login:${email}`);
   await createSession(user.id, user.role as (typeof ROLES)[number]);
   redirect("/dashboard");
 }
