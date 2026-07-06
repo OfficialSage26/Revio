@@ -16,7 +16,9 @@ npm run dev              # http://localhost:3000
 ```
 
 The app runs fully locally out of the box — SQLite for data, and uploaded files
-saved to `public/uploads`.
+saved to a private `./uploads` folder served through an authenticated route.
+
+Copy `.env.example` to `.env` before starting.
 
 ### Environment (`.env`)
 
@@ -42,6 +44,17 @@ saved to `public/uploads`.
 Access control: only a project's owning student or its linked adviser can open it;
 anything else returns 404.
 
+## Security
+
+- Passwords hashed with **bcrypt**; sessions are signed httpOnly JWT cookies (`jose`).
+- **Login rate limiting** — 5 failed attempts per email per 15 minutes.
+- Uploads are **extension-whitelisted** (blocks executable/script types) and served
+  only through `/api/files/[key]`, which verifies the session and project membership
+  before streaming the file — no team can read another team's documents.
+- Security headers (`X-Frame-Options`, `X-Content-Type-Options`, `Referrer-Policy`,
+  `Permissions-Policy`) set in `next.config.ts`; `poweredByHeader` disabled.
+- Every project route enforces student-or-adviser membership.
+
 ## Project structure
 
 ```
@@ -56,14 +69,11 @@ src/app/                      Pages: /, /login, /register, /dashboard,
 src/components/               UI + client forms
 ```
 
-## Deploying to Vercel
+## Deploying (free options)
 
-1. Switch the Prisma datasource provider in `prisma/schema.prisma` from `sqlite`
-   to `postgresql` and set `DATABASE_URL` to a Postgres connection string (e.g.
-   Neon via the Vercel Marketplace). Re-run `npx prisma migrate dev`.
-2. Add a Vercel Blob store and set `BLOB_READ_WRITE_TOKEN` so uploads persist.
-3. Set a strong `AUTH_SECRET` in the project's environment variables.
-4. Deploy.
+Revio can run **100% free**. Three paths — Vercel + Neon + Blob, Vercel + Supabase,
+or a fully-local SQLite build for an offline defense demo — are documented step by
+step in **[DEPLOYMENT.md](./DEPLOYMENT.md)**, including the security checklist.
 
 ## Out of scope (future versions)
 

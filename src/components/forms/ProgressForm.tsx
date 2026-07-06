@@ -1,17 +1,35 @@
 "use client";
 
 import { useActionState, useEffect, useRef } from "react";
+import { Send, CheckCircle2, AlertCircle } from "lucide-react";
 import { postProgressAction, type FormState } from "@/app/actions/progress";
 import { SubmitButton } from "@/components/SubmitButton";
 
-const inputClass =
-  "w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100";
-
 const fields = [
-  { name: "completedFeatures", label: "Completed features", required: true },
-  { name: "milestones", label: "Milestones achieved", required: false },
-  { name: "challenges", label: "Challenges encountered", required: false },
-  { name: "upcomingTasks", label: "Upcoming tasks", required: false },
+  {
+    name: "completedFeatures",
+    label: "Completed features",
+    required: true,
+    placeholder: "What did you finish since the last update?",
+  },
+  {
+    name: "milestones",
+    label: "Milestones achieved",
+    required: false,
+    placeholder: "Any major goals reached?",
+  },
+  {
+    name: "challenges",
+    label: "Challenges encountered",
+    required: false,
+    placeholder: "What's blocking or slowing you down?",
+  },
+  {
+    name: "upcomingTasks",
+    label: "Upcoming tasks",
+    required: false,
+    placeholder: "What's next?",
+  },
 ] as const;
 
 export function ProgressForm({ projectId }: { projectId: string }) {
@@ -26,27 +44,43 @@ export function ProgressForm({ projectId }: { projectId: string }) {
   }, [state]);
 
   return (
-    <form ref={ref} action={formAction} className="space-y-3">
+    <form ref={ref} action={formAction} className="space-y-4">
       <input type="hidden" name="projectId" value={projectId} />
-      {fields.map((f) => (
-        <div key={f.name}>
-          <label className="mb-1 block text-sm font-medium text-slate-700">
-            {f.label}
-            {!f.required && (
-              <span className="font-normal text-slate-400"> (optional)</span>
-            )}
-          </label>
-          <textarea
-            name={f.name}
-            rows={2}
-            required={f.required}
-            className={inputClass}
-          />
-        </div>
-      ))}
-      {state?.error && <p className="text-sm text-red-600">{state.error}</p>}
-      {state?.ok && <p className="text-sm text-green-600">Progress posted.</p>}
-      <SubmitButton>Post update</SubmitButton>
+      <div className="grid gap-4 sm:grid-cols-2">
+        {fields.map((f) => (
+          <div key={f.name}>
+            <label className="field-label">
+              {f.label}
+              {!f.required && (
+                <span className="font-normal text-slate-400"> (optional)</span>
+              )}
+            </label>
+            <textarea
+              name={f.name}
+              rows={2}
+              required={f.required}
+              placeholder={f.placeholder}
+              className="input"
+            />
+          </div>
+        ))}
+      </div>
+      {state?.error && (
+        <p className="flex items-center gap-1.5 text-sm text-rose-600">
+          <AlertCircle className="h-4 w-4 shrink-0" />
+          {state.error}
+        </p>
+      )}
+      {state?.ok && (
+        <p className="flex items-center gap-1.5 text-sm text-emerald-600">
+          <CheckCircle2 className="h-4 w-4" />
+          Progress posted.
+        </p>
+      )}
+      <SubmitButton>
+        <Send className="h-4 w-4" />
+        Post update
+      </SubmitButton>
     </form>
   );
 }

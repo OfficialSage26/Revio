@@ -1,11 +1,9 @@
 "use client";
 
 import { useActionState } from "react";
+import { FileText, GitBranch, Globe, KeyRound, AlertCircle } from "lucide-react";
 import { createProjectAction, type FormState } from "@/app/actions/project";
 import { SubmitButton } from "@/components/SubmitButton";
-
-const inputClass =
-  "w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100";
 
 export function CreateProjectForm({ defaultCode }: { defaultCode?: string }) {
   const [state, formAction] = useActionState<FormState, FormData>(
@@ -14,78 +12,84 @@ export function CreateProjectForm({ defaultCode }: { defaultCode?: string }) {
   );
 
   return (
-    <form action={formAction} className="space-y-4">
+    <form action={formAction} className="space-y-5">
       <div>
-        <label className="mb-1.5 block text-sm font-medium text-slate-700">
-          Project title
-        </label>
-        <input name="title" type="text" required className={inputClass} />
+        <label className="field-label">Project title</label>
+        <input
+          name="title"
+          type="text"
+          required
+          placeholder="e.g. Smart Attendance System"
+          className="input"
+        />
       </div>
 
       <div>
-        <label className="mb-1.5 block text-sm font-medium text-slate-700">
-          Description
-        </label>
+        <label className="field-label">Description</label>
         <textarea
           name="description"
           rows={3}
           required
-          className={inputClass}
+          className="input"
           placeholder="What is your capstone about?"
         />
       </div>
 
-      <div className="grid gap-4 sm:grid-cols-2">
+      <div className="grid gap-5 sm:grid-cols-2">
         <div>
-          <label className="mb-1.5 block text-sm font-medium text-slate-700">
-            GitHub repository{" "}
+          <label className="field-label flex items-center gap-1.5">
+            <GitBranch className="h-3.5 w-3.5 text-slate-400" /> GitHub repo
             <span className="font-normal text-slate-400">(optional)</span>
           </label>
           <input
             name="githubUrl"
             type="url"
-            className={inputClass}
+            className="input"
             placeholder="https://github.com/…"
           />
         </div>
         <div>
-          <label className="mb-1.5 block text-sm font-medium text-slate-700">
-            Live deployment{" "}
+          <label className="field-label flex items-center gap-1.5">
+            <Globe className="h-3.5 w-3.5 text-slate-400" /> Live deployment
             <span className="font-normal text-slate-400">(optional)</span>
           </label>
           <input
             name="liveUrl"
             type="url"
-            className={inputClass}
+            className="input"
             placeholder="https://…"
           />
         </div>
       </div>
 
       <div>
-        <label className="mb-1.5 block text-sm font-medium text-slate-700">
-          Adviser code
+        <label className="field-label flex items-center gap-1.5">
+          <KeyRound className="h-3.5 w-3.5 text-slate-400" /> Adviser code
         </label>
         <input
           name="adviserCode"
           type="text"
           required
           defaultValue={defaultCode}
-          className={`${inputClass} font-mono uppercase tracking-wider`}
+          className="input font-mono uppercase tracking-[0.2em]"
           placeholder="ADV-XXXXXX"
         />
-        <p className="mt-1 text-xs text-slate-500">
+        <p className="mt-1.5 text-xs text-slate-500">
           Ask your adviser for their Revio code.
         </p>
       </div>
 
       {state?.error && (
-        <p className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">
+        <p className="flex items-center gap-2 rounded-xl bg-rose-50 px-3.5 py-2.5 text-sm text-rose-700">
+          <AlertCircle className="h-4 w-4 shrink-0" />
           {state.error}
         </p>
       )}
 
-      <SubmitButton className="w-full">Create project</SubmitButton>
+      <SubmitButton className="w-full">
+        <FileText className="h-4 w-4" />
+        Create project
+      </SubmitButton>
     </form>
   );
 }

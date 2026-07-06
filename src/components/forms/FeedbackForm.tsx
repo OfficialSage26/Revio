@@ -1,6 +1,7 @@
 "use client";
 
 import { useActionState, useEffect, useRef } from "react";
+import { MessageSquarePlus, AlertCircle } from "lucide-react";
 import { giveFeedbackAction, type FormState } from "@/app/actions/feedback";
 import { SubmitButton } from "@/components/SubmitButton";
 import { DOCUMENT_STATUSES, STATUS_LABELS } from "@/lib/constants";
@@ -25,7 +26,11 @@ export function FeedbackForm({
   }, [state]);
 
   return (
-    <form ref={ref} action={formAction} className="mt-3 space-y-2">
+    <form
+      ref={ref}
+      action={formAction}
+      className="mt-4 space-y-2.5 rounded-xl border border-slate-200 bg-slate-50/70 p-3"
+    >
       <input type="hidden" name="projectId" value={projectId} />
       <input type="hidden" name="targetType" value={targetType} />
       <input type="hidden" name="targetId" value={targetId} />
@@ -34,14 +39,14 @@ export function FeedbackForm({
         rows={2}
         required
         placeholder="Leave feedback…"
-        className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100"
+        className="input bg-white"
       />
       <div className="flex flex-wrap items-center gap-3">
         {targetType === "DOCUMENT" && (
           <select
             name="statusApplied"
             defaultValue=""
-            className="rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-sm outline-none focus:border-indigo-500"
+            className="input h-10 w-auto py-0"
           >
             <option value="">Keep current status</option>
             {DOCUMENT_STATUSES.map((s) => (
@@ -51,8 +56,16 @@ export function FeedbackForm({
             ))}
           </select>
         )}
-        <SubmitButton className="!px-3 !py-1.5">Submit feedback</SubmitButton>
-        {state?.error && <span className="text-sm text-red-600">{state.error}</span>}
+        <SubmitButton className="!px-3.5 !py-2">
+          <MessageSquarePlus className="h-4 w-4" />
+          Submit feedback
+        </SubmitButton>
+        {state?.error && (
+          <span className="flex items-center gap-1.5 text-sm text-rose-600">
+            <AlertCircle className="h-4 w-4 shrink-0" />
+            {state.error}
+          </span>
+        )}
       </div>
     </form>
   );
